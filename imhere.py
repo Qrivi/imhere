@@ -9,20 +9,21 @@ import mechanize
 import twitter
 
 def fetch():
-    br.open(br.open(sheet).read())
+    url = br.open(sheet).read()
+    br.open(url)
 
     fid = br.geturl()[-24:]
-    url = 'https://api.foursquare.com/v2/venues/' + fid \
+    api = 'https://api.foursquare.com/v2/venues/' + fid \
         + '?client_id=' + args.fid + '&client_secret=' + args.fsecret + '&v=' + date
 
-    data = json.loads(br.open(url).read())
-    name = data['response']['venue'].get('name')  # n
-    address = data['response']['venue']['location'].get('address')  # a
-    crossstreet = data['response']['venue']['location'].get('crossStreet')  # x
-    city = data['response']['venue']['location'].get('city')  # t
-    postalcode = data['response']['venue']['location'].get('postalCode')  # p
-    countrycode = data['response']['venue']['location'].get('cc')  # s
-    country = data['response']['venue']['location'].get('country')  # c
+    data = json.loads(br.open(api).read())
+    name = data['response']['venue'].get('name')
+    address = data['response']['venue']['location'].get('address')
+    crossstreet = data['response']['venue']['location'].get('crossStreet')
+    city = data['response']['venue']['location'].get('city') 
+    postalcode = data['response']['venue']['location'].get('postalCode')
+    countrycode = data['response']['venue']['location'].get('cc')
+    country = data['response']['venue']['location'].get('country')
     coordinates = str(data['response']['venue']['location'].get('lat')) \
         + ',' + str(data['response']['venue']['location'].get('lng'))
 
@@ -33,41 +34,53 @@ def fetch():
         p = postalcode,
         s = countrycode,
         c = country,
-        o = coordinates)
+        o = coordinates,
+        u = url)
 
     tw.UpdateProfile(location = output)
-    print '[', time.strftime('%H:%M:%s'), ']', output
+    print time.strftime('[%H:%M:%s]'), output
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--sid', type=str,
-                    help='Google Sheet ID',
-                    required=True)
-parser.add_argument('--fid', type=str,
-                    help='Foursquare Client ID',
-                    required=True)
-parser.add_argument('--fsecret', type=str,
-                    help='Foursquare Client Secret',
-                    required=True)
-parser.add_argument('--tkey', type=str,
-                    help='Twitter Consumer Key',
-                    required=True)
-parser.add_argument('--tsecret', type=str,
-                    help='Twitter Consumer Secret',
-                    required=True)
-parser.add_argument('--atoken', type=str,
-                    help='Twitter Access Token',
-                    required=True)
-parser.add_argument('--asecret', type=str,
-                    help='Twitter Access Token Secret',
-                    required=True)
-parser.add_argument('--output', type=str,
-                    help='Output string',
-                    required=False)
-parser.add_argument('--repeat', type=int,
-                    help='Period after which script should re-execute (in minutes)',
-                    required=False)
+parser = argparse.ArgumentParser('Updates your Twitter profile location with data from your last Swarm check-in.')
+parser.add_argument('--sid', type = str,
+                    metavar = 'Google Sheet ID',
+                    help = 'The Google Sheet containing the venue url of your last Swarm check-in',
+                    required = True)
+parser.add_argument('--fid', type = str,
+                    metavar = 'Foursquare Client ID',
+                    help = 'Your Foursquare application Client ID',
+                    required = True)
+parser.add_argument('--fsecret', type = str,
+                    metavar = 'Foursquare Client Secret',
+                    help = 'Your Foursquare application Client Secret',
+                    required = True)
+parser.add_argument('--tkey', type = str,
+                    metavar = 'Twitter Consumer Key',
+                    help = 'Your Twitter application Consumer Key',
+                    required = True)
+parser.add_argument('--tsecret', type = str,
+                    metavar = 'Twitter Consumer Secret',
+                    help = 'Your Twitter application Consumer Secret',
+                    required = True)
+parser.add_argument('--atoken', type = str,
+                    metavar = 'Twitter Access Token',
+                    help = 'Your pregenerated Twitter Access Token',
+                    required = True)
+parser.add_argument('--asecret', type = str,
+                    metavar = 'Twitter Access Token Secret',
+                    help = 'Your pregenerated Twitter Access Token Secret',
+                    required = True)
+parser.add_argument('--output', type = str,
+                    metavar = 'Output string format',
+                    help = '{n} prints venue name, {a} address, {x} cross street, {t} city, {p} postal code, {c} country, {s} country code, {o} coordinates and {u} url',
+                    required = False,
+                    default = '{t}, {c}')
+parser.add_argument('--repeat', type = int,
+                    metavar = 'Repeat interval',
+                    help = 'Delay (in minutes) until next automatic execution of the script',
+                    default = 0)
 args = parser.parse_args()
 
+formatter = args.output
 date = time.strftime('%Y%m%d')
 sheet = 'https://docs.google.com/spreadsheets/d/e/' + args.sid \
     + '/pub?gid=0&single=true&output=csv'
@@ -78,15 +91,12 @@ tw = twitter.Api(consumer_key = args.tkey,
                  access_token_key = args.atoken,
                  access_token_secret = args.asecret)
 
-if args.output is not None and len(args.output) > 1:
-    formatter = args.output
-else:
-    formatter = '{t}, {c}'
+print 'Location format has been set to:', formatter
 
-print 'Location format has been set to: ', formatter
+if args.repeat > 0:
+    print 'Location will update every', args.repeat, 'minutes'
+    fetch()
 
-if args.repeat is not None and args.repeat > 0:
-    print 'Location will update every ', args.repeat, 'minutes'
     scheduler = BlockingScheduler()
     scheduler.add_job(fetch, 'interval', minutes = args.repeat)
     scheduler.start()
