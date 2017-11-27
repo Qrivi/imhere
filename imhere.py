@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from apscheduler.schedulers.blocking import BlockingScheduler 
+from apscheduler.schedulers.blocking import BlockingScheduler
 import argparse
 import time
 import json
@@ -17,13 +17,13 @@ def fetch():
         + '?client_id=' + args.fid + '&client_secret=' + args.fsecret + '&v=' + date
 
     data = json.loads(br.open(api).read())
-    name = data['response']['venue'].get('name')
-    address = data['response']['venue']['location'].get('address')
-    crossstreet = data['response']['venue']['location'].get('crossStreet')
-    city = data['response']['venue']['location'].get('city') 
-    postalcode = data['response']['venue']['location'].get('postalCode')
-    countrycode = data['response']['venue']['location'].get('cc')
-    country = data['response']['venue']['location'].get('country')
+    name = data['response']['venue'].get('name').encode('utf-8')
+    address = data['response']['venue']['location'].get('address').encode('utf-8')
+    crossstreet = data['response']['venue']['location'].get('crossStreet').encode('utf-8')
+    city = data['response']['venue']['location'].get('city').encode('utf-8')
+    postalcode = data['response']['venue']['location'].get('postalCode').encode('utf-8')
+    countrycode = data['response']['venue']['location'].get('cc').encode('utf-8')
+    country = data['response']['venue']['location'].get('country').encode('utf-8')
     coordinates = str(data['response']['venue']['location'].get('lat')) \
         + ',' + str(data['response']['venue']['location'].get('lng'))
 
