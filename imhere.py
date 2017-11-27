@@ -17,15 +17,15 @@ def fetch():
         + '?client_id=' + args.fid + '&client_secret=' + args.fsecret + '&v=' + date
 
     data = json.loads(br.open(api).read())
-    name = data['response']['venue'].get('name').encode('utf-8')
-    address = data['response']['venue']['location'].get('address').encode('utf-8')
-    crossstreet = data['response']['venue']['location'].get('crossStreet').encode('utf-8')
-    city = data['response']['venue']['location'].get('city').encode('utf-8')
-    postalcode = data['response']['venue']['location'].get('postalCode').encode('utf-8')
-    countrycode = data['response']['venue']['location'].get('cc').encode('utf-8')
-    country = data['response']['venue']['location'].get('country').encode('utf-8')
-    coordinates = str(data['response']['venue']['location'].get('lat')) \
-        + ',' + str(data['response']['venue']['location'].get('lng'))
+    name = unicode(data['response']['venue'].get('name')).encode('utf-8')
+    address = unicode(data['response']['venue']['location'].get('address')).encode('utf-8')
+    crossstreet = unicode(data['response']['venue']['location'].get('crossStreet')).encode('utf-8')
+    city = unicode(data['response']['venue']['location'].get('city')).encode('utf-8')
+    postalcode = unicode(data['response']['venue']['location'].get('postalCode')).encode('utf-8')
+    countrycode = unicode(data['response']['venue']['location'].get('cc')).encode('utf-8')
+    country = unicode(data['response']['venue']['location'].get('country')).encode('utf-8')
+    coordinates = unicode(data['response']['venue']['location'].get('lat')) \
+        + ',' + unicode(data['response']['venue']['location'].get('lng'))
 
     output = formatter.format( n = name,
         a = address,
