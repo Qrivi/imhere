@@ -27,7 +27,7 @@ def fetch():
     coordinates = unicode(data['response']['venue']['location'].get('lat')) \
         + ',' + unicode(data['response']['venue']['location'].get('lng'))
 
-    output = formatter.format( n = name,
+    position = formatter.format( n = name,
         a = address,
         x = crossstreet,
         t = city,
@@ -37,8 +37,14 @@ def fetch():
         o = coordinates,
         u = url)
 
-    tw.UpdateProfile(location = output)
-    print time.strftime('[%H:%M:%s]'), output
+    global output
+    print time.strftime('[%H:%M:%s]'), position
+
+    if output != position:
+        tw.UpdateProfile(location = position)
+        print 'Twitter location has been updated'
+
+    output = position
 
 parser = argparse.ArgumentParser('Updates your Twitter profile location with data from your last Swarm check-in.')
 parser.add_argument('--sid', type = str,
@@ -80,6 +86,7 @@ parser.add_argument('--repeat', type = int,
                     default = 0)
 args = parser.parse_args()
 
+output = None
 formatter = args.output
 date = time.strftime('%Y%m%d')
 sheet = 'https://docs.google.com/spreadsheets/d/e/' + args.sid \
